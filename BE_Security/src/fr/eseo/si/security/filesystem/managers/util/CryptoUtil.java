@@ -1,8 +1,10 @@
 package fr.eseo.si.security.filesystem.managers.util;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.InvalidKeyException;
@@ -70,14 +72,14 @@ public class CryptoUtil {
 		boolean isEncrypt = false;
 		if(file.isDirectory()) return isEncrypt;
 		try {
-			Scanner scanner = new Scanner(file);
-			while (scanner.hasNextLine()) {
-				String line = scanner.nextLine();
-				if(line.equals(TAG)) { 
-					isEncrypt = true;
-				}
+			FileReader namereader = new FileReader(file);
+			BufferedReader in = new BufferedReader(namereader);
+			String line = in.readLine();
+			if(line.equals(TAG)) { 
+				isEncrypt = true;
 			}
-		} catch (Exception e){}
+		}
+		catch (Exception e){}
 
 		return isEncrypt;
 	}

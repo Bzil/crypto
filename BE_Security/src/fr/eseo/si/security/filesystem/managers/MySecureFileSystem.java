@@ -32,11 +32,11 @@ public class MySecureFileSystem extends DefaultFileSystemManager {
 	public void  encrpytDecrypt(File[] files) {
 		for (File file : files) {
 			if(CryptoUtil.isEncrypt(file)){
-				System.out.println("Déchiffrement");
+				//System.out.println("Déchiffrement");
 				CryptoUtil.decrypt(this.pwh, file, file);
 			}
 			else {
-				System.out.println("Chiffrement");
+				//System.out.println("Chiffrement");
 				CryptoUtil.encrypt(this.pwh, file, file);
 			}
 		}
