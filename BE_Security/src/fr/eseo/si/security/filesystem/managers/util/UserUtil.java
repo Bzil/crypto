@@ -8,11 +8,21 @@ import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
-
+/**
+ * Utilitaire de gestion des utilisateur
+ * @author bzil
+ *	@version 1.0
+ */
 public class UserUtil {
-
+	
+	/**
+	 * Répertoire utilisateur
+	 */
 	public static String PATH = System.getProperty("user.dir");
-
+	
+	/**
+	 * Nom du fichier de config
+	 */
 	public static String FILE_NAME = "users.properties";
 
 	//private static byte[] SALT = {'a', 5, 'f', 54 };
@@ -79,6 +89,7 @@ public class UserUtil {
 		} catch (NoSuchAlgorithmException e){
 			e.printStackTrace();
 		}
+		String s = sb.toString();
 		return sb.toString();
 	}
 

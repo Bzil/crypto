@@ -12,17 +12,36 @@ import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
-
+/**
+ * Utiliataire de chiffrement
+ * @author bzil
+ * @version 1.0
+ */
 public class CryptoUtil {
+	/**
+	 * Algorithme et transformation de cryptage
+	 */
 	private static final String ALGORITHM = "AES";
 	private static final String TRANSFORMATION = "AES";
-	private static final String TAG ="1ézdsS5dfggvsssdxgvssfg0xxsx54354893";
+	
+	/**
+	 * Tag de fichier
+	 */
+	private static final String TAG_FILE ="1ézdsS5dfggvsssdxgvssfg0xxsx54354893";
+	/**
+	 * Tag de dossier
+	 */
+	private static final String TAG_FOLDER ="1SDKJILI7:kjhgyBHFGHMçJBHgfVGF";
+		
+	public static final int FILE_CRYPT = 1;
+	public static final int FILE_CLEAR = -1;
+	public static final int FOLDER_CRYPT = 2;
+	public static final int FOLDER_CLEAR = -2;
 
 	public static void encrypt(String key, File inputFile, File outputFile) {
 		doCrypto(Cipher.ENCRYPT_MODE, key, inputFile, outputFile);
@@ -39,7 +58,6 @@ public class CryptoUtil {
 			cipher.init(cipherMode, secretKey);
 			if(cipherMode == Cipher.DECRYPT_MODE){
 				removeFirstLine(inputFile);
-				removeFirstLine(inputFile);
 			}
 			FileInputStream inputStream = new FileInputStream(inputFile);
 			byte[] inputBytes = new byte[(int) inputFile.length()];
@@ -49,11 +67,10 @@ public class CryptoUtil {
 
 			FileOutputStream outputStream = new FileOutputStream(outputFile);
 			if(cipherMode == Cipher.ENCRYPT_MODE){
-				outputStream.write(new StringBuilder().append(TAG).toString().getBytes());
-				if(inputFile.isFile()){
-					outputStream.write("\n-- File --\n".getBytes());
+				if(inputFile.getAbsolutePath().endsWith(ZipUtil.EXT_ZIP)){
+					outputStream.write(new StringBuilder().append(TAG_FOLDER).append("\n").toString().getBytes());
 				}else {
-					outputStream.write("\n-- Folder --\n".getBytes());
+					outputStream.write(new StringBuilder().append(TAG_FILE).append("\n").toString().getBytes());
 				}
 			}
 			outputStream.write(outputBytes);
@@ -66,17 +83,24 @@ public class CryptoUtil {
 			//throw new Exception("Error encrypting/decrypting file", ex);
 		}
 	}
-
+	/**
+	 * Method to know if a file or a folder is encryped
+	 * @param file
+	 * @return 1 pour fichier chiffré 2 pour dossier chiffré -1 pour fichier non chiffré -2 pour dossier non chiffré 
+	 */
 	@SuppressWarnings("resource")
-	public static boolean isEncrypt(File file){
-		boolean isEncrypt = false;
-		if(file.isDirectory()) return isEncrypt;
+	public static int isEncrypt(File file){
+		int isEncrypt = FILE_CLEAR;
+		if(file.isDirectory()) return FOLDER_CLEAR;
 		try {
 			FileReader namereader = new FileReader(file);
 			BufferedReader in = new BufferedReader(namereader);
 			String line = in.readLine();
-			if(line.equals(TAG)) { 
-				isEncrypt = true;
+			if(line.equals(TAG_FILE)) { 
+				isEncrypt = FILE_CRYPT;
+			}
+			else if (line.equals(TAG_FOLDER)) { 
+				isEncrypt = FOLDER_CRYPT;
 			}
 		}
 		catch (Exception e){}

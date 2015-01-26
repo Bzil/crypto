@@ -1,16 +1,13 @@
 package fr.eseo.si.security.filesystem.managers;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Properties;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import fr.eseo.si.security.filesystem.managers.util.CryptoUtil;
+import fr.eseo.si.security.filesystem.managers.util.DeleteUtil;
+import fr.eseo.si.security.filesystem.managers.util.SignatureUtil;
 import fr.eseo.si.security.filesystem.managers.util.UserUtil;
+import fr.eseo.si.security.filesystem.managers.util.ZipUtil;
 
 public class MySecureFileSystem extends DefaultFileSystemManager {
 
@@ -37,35 +34,59 @@ public class MySecureFileSystem extends DefaultFileSystemManager {
 	@Override
 	public void  encrpytDecrypt(File[] files) {
 		for (File file : files) {
-			if(CryptoUtil.isEncrypt(file)){
-				//System.out.println("Déchiffrement");
+			switch(CryptoUtil.isEncrypt(file)){
+			case CryptoUtil.FILE_CRYPT : 
+				System.out.println("Déchiffrement fichier");
 				CryptoUtil.decrypt(this.pwh, file, file);
-			}
-			else {
-				//System.out.println("Chiffrement");
+				break;
+			case CryptoUtil.FILE_CLEAR :
+				System.out.println("Chiffrement fichier");
 				CryptoUtil.encrypt(this.pwh, file, file);
+				break;
+			case CryptoUtil.FOLDER_CRYPT : 
+				System.out.println("Déchiffrement dossier");
+				CryptoUtil.decrypt(pwh,file,file);
+				ZipUtil unZip = new ZipUtil();
+				unZip.unZipIt(file.getAbsolutePath(),file.getParent());
+				break;
+			case CryptoUtil.FOLDER_CLEAR :
+				System.out.println("Chiffrement dossier");
+				ZipUtil appZip = new ZipUtil();
+				appZip.generateFileList(file.getParent(),file);
+				String ZippedDirectory = new StringBuilder().append(file.getAbsolutePath()).append(".zip").toString();
+				appZip.zipIt(file.getParent(), ZippedDirectory);
+				File zippedFile = new File(ZippedDirectory);
+				DeleteUtil.delete(file);
+				CryptoUtil.encrypt(pwh, zippedFile, zippedFile);
+				break;
 			}
 		}
 	}
-	//ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file.getName()+".zip"));
-	public static void addToZipFile(String fileName, ZipOutputStream zos) throws FileNotFoundException, IOException {
 
-		System.out.println("Writing '" + fileName + "' to zip file");
-
-		File file = new File(fileName);
-		FileInputStream fis = new FileInputStream(file);
-		ZipEntry zipEntry = new ZipEntry(fileName);
-		zos.putNextEntry(zipEntry);
-
-		byte[] bytes = new byte[1024];
-		int length;
-		while ((length = fis.read(bytes)) >= 0) {
-			zos.write(bytes, 0, length);
+	@Override
+	public void delete(File[] files) {
+		System.out.println("Suppression fichier / dossiers");
+		for (File file : files){
+			DeleteUtil.delete(file);
 		}
-
-		zos.closeEntry();
-		fis.close();
 	}
 
+	@Override
+	public void sign(File[] files) {
+		System.out.println("Signature de fichiers");
+		SignatureUtil.keyPairGenerator();
+		for(File f : files){
+			SignatureUtil.recursiveSign(f);
+		}
+	}
 
+	@Override
+	public void verify(File[] files) {
+		System.out.println("Vérification de fichiers");
+		SignatureUtil.keyPairGenerator();
+		for(File f : files){
+			SignatureUtil.recursiveVerify(f);
+
+		}
+	}
 }
