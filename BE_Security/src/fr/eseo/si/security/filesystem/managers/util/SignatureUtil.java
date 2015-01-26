@@ -23,6 +23,11 @@ import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
+/**
+ * Utilitaire de gestion des signatures
+ * @author bzil
+ * @version 1.0	
+ */
 public class SignatureUtil {
 
 	private static PublicKey PUBLIC_KEY = null;
@@ -31,10 +36,12 @@ public class SignatureUtil {
 	private static String EXT_KEY = ".key";
 	private static String EXT_SIGN = ".sign";
 	
-
+	/**
+	 * Méthode générant les paires de clés pour le chiffrement des signatures
+	 */
 	public static void keyPairGenerator(){
 		try {
-			addProviderDSTC();    
+			addProvider();    
 			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", "DSTC");
 			SecureRandom srandom = SecureRandom.getInstance("SHA256PRNG");
 			long userSeed = System.currentTimeMillis();
@@ -48,7 +55,11 @@ public class SignatureUtil {
 		}
 
 	}
-
+	/**
+	 * Méthode vérifiant un fichier
+	 * @param file
+	 * @return vrai si fichier correct
+	 */
 	public static boolean verify(File file){
 		boolean verifies = false;
 		try {
@@ -96,18 +107,16 @@ public class SignatureUtil {
 		}	
 		return verifies;
 	}
-
+	/**
+	 * Méthode réalisant la signature des fichiers
+	 * @param file
+	 */
 	public static void sign(File file){
 		byte[] realSig = null;
 		try {
-			/* Save public key for later */
-			savePublicKey(file);
-
-			/* Get signature object + signature object initialization */
+			generatePublicKey(file);
 			Signature dsa = Signature.getInstance("SHA256withRSA", "DSTC"); 
 			dsa.initSign(PRIVATE_KEY);
-
-			/* Supply the data to be signed to our signature object */
 			FileInputStream fis = new FileInputStream(file);
 			BufferedInputStream bufin = new BufferedInputStream(fis);
 			byte[] buffer = new byte[1024];
@@ -117,19 +126,16 @@ public class SignatureUtil {
 			};
 			bufin.close();
 			fis.close();
-
-			/* Generate signature */
 			realSig = dsa.sign();
-			saveSignature(realSig, file);
+			signature(realSig, file);
 
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException | IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 
-	public static void saveSignature(byte[] realSig, File file){
+	private static void signature(byte[] realSig, File file){
 		try {
-			/* save the signature in a file */
 			FileOutputStream sigfos = new FileOutputStream(new StringBuilder().append(file.getAbsolutePath().toString()).append(".sign").toString());
 			sigfos.write(Base64Util.encode(realSig).getBytes());
 			sigfos.close();
@@ -138,7 +144,7 @@ public class SignatureUtil {
 		}
 
 	}
-	public static void savePublicKey(File file){
+	private static void generatePublicKey(File file){
 		try {
 			/* save the public key in a file */
 			String pkey = file.getAbsolutePath()+EXT_KEY;
@@ -155,7 +161,7 @@ public class SignatureUtil {
 		}
 	}
 
-	private static Provider addProviderDSTC() {
+	private static Provider addProvider() {
 		Provider dstc_provider = new com.dstc.security.provider.DSTC();
 		int result = Security.addProvider(dstc_provider);
 		if (result == -1) {

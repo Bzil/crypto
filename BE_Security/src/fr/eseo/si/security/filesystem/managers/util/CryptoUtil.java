@@ -17,14 +17,27 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
-
+/**
+ * Utiliataire de chiffrement
+ * @author bzil
+ * @version 1.0
+ */
 public class CryptoUtil {
+	/**
+	 * Algorithme et transformation de cryptage
+	 */
 	private static final String ALGORITHM = "AES";
 	private static final String TRANSFORMATION = "AES";
 	
+	/**
+	 * Tag de fichier
+	 */
 	private static final String TAG_FILE ="1ézdsS5dfggvsssdxgvssfg0xxsx54354893";
+	/**
+	 * Tag de dossier
+	 */
 	private static final String TAG_FOLDER ="1SDKJILI7:kjhgyBHFGHMçJBHgfVGF";
-	
+		
 	public static final int FILE_CRYPT = 1;
 	public static final int FILE_CLEAR = -1;
 	public static final int FOLDER_CRYPT = 2;

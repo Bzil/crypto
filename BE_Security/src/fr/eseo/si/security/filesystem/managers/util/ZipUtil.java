@@ -11,21 +11,31 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
+/**
+ * Utilitaire de gestion des archives
+ * @author bzil
+ * @version 1.0
+ */
 public class ZipUtil {
+	
+	/**
+	 * Extention pour les fichier archives
+	 */
 	public static final String EXT_ZIP = ".zip";
+	
+	/**
+	 * Liste des fichiers à archiver
+	 */
 	private List<String> fileList;
 
 	public ZipUtil(){
 		fileList = new ArrayList<String>();
 	}
-
-	public static void zipFolder(String folderName) {
-		ZipUtil appZip = new ZipUtil();
-		appZip.generateFileList(folderName, new File(folderName));
-		appZip.zipIt(folderName, folderName + ZipUtil.EXT_ZIP);
-	}
-
+	/**
+	 * Crée une archive zip à partir d'un dossier
+	 * @param sourceFolder dossier à archiver
+	 * @param zipFile nom du fichier de sortie en zip
+	 */
 	public void zipIt(String sourceFolder, String zipFile){
 		byte[] buffer = new byte[1024];
 		String source = "";
@@ -40,10 +50,10 @@ public class ZipUtil {
 			}
 			fos = new FileOutputStream(zipFile);
 			zos = new ZipOutputStream(fos);
-			System.out.println("Output to Zip : " + zipFile);
+			System.out.println("Archive de sortie : " + zipFile);
 			FileInputStream in = null;
 			for (String file : this.fileList){
-				System.out.println("File Added : " + file);
+				System.out.println("Fichier ajouté : " + file);
 				ZipEntry ze = new ZipEntry(source + File.separator + file);
 				zos.putNextEntry(ze);
 				try{
@@ -72,7 +82,11 @@ public class ZipUtil {
 			}
 		}
 	}
-
+	/**
+	 * Génére la liste des fichiers / dossier à archiver
+	 * @param sourceFolder dossier dans lequel on se situe
+	 * @param node noeud courant
+	 */
 	public void generateFileList(String sourceFolder, File node){
 		// add file only
 		if (node.isFile()){
@@ -85,15 +99,21 @@ public class ZipUtil {
 			}
 		}
 	}
-
+	
+	/**
+	 * Génére le nom de l'archive
+	 * @param sourceFolder dossier que l'on veut archiver
+	 * @param file dont on veut le nom
+	 * @return nom de l'archive
+	 */
 	private String generateZipEntry(String sourceFolder, String file){
 		return file.substring(sourceFolder.length() + 1, file.length());
 	}
 
 	/**
-	 * Unzip it
-	 * @param zipFile input zip file
-	 * @param output zip file output folder
+	 * Dézippe une archive zip
+	 * @param zipFile fichier à dézipper
+	 * @param output le dossier dézipper
 	 */
 	public void unZipIt(String zipFile, String outputFolder){
 		byte[] buffer = new byte[1024];
